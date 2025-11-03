@@ -44,6 +44,30 @@ h1{
 .back-btn:hover{
   background: rgba(255,255,255,0.12);
 }
+.search-box{
+  margin-bottom:20px;
+  width:100%;
+  max-width:650px;
+  display:flex;
+  justify-content:center;
+}
+.search-box input{
+  width:100%;
+  padding:10px 14px;
+  border-radius:14px;
+  border:none;
+  outline:none;
+  font-size:1rem;
+  background: rgba(255,255,255,0.1);
+  color:#fff;
+  transition:0.3s;
+}
+.search-box input::placeholder{
+  color:rgba(255,255,255,0.7);
+}
+.search-box input:focus{
+  background: rgba(255,255,255,0.2);
+}
 .card{
   width:100%;
   max-width:650px;
@@ -85,11 +109,34 @@ th{
 .status-process .dot { color: #ffea00; }   
 .status-rejected .dot { color: #ff0033; }  
 
+.smartlink-text{
+  font-weight:600;
+  color:#39f;
+  text-decoration:underline;
+}
+
 footer{
   margin-top:20px;
   color:rgba(255,255,255,0.6);
   font-size:0.85rem;
   text-align:center;
+}
+.pagination{
+  margin-top:20px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+.page-btn{
+  cursor:pointer;
+  padding:6px 14px;
+  border-radius:12px;
+  background: rgba(255,255,255,0.1);
+  font-weight:600;
+  transition:0.2s;
+}
+.page-btn:hover{
+  background: rgba(255,255,255,0.2);
 }
 @media(max-width:600px){
   th,td{padding:12px 8px;font-size:0.85rem;}
@@ -101,6 +148,10 @@ footer{
 <h1>Bngnil Porects - Releases</h1>
 
 <a href="https://dynoticid.github.io/smartlink/" class="back-btn">Back to Artists</a>
+
+<div class="search-box">
+  <input type="text" id="search" placeholder="Cari lagu...">
+</div>
 
 <div class="card">
   <table>
@@ -115,29 +166,66 @@ footer{
       <!-- Data akan diisi oleh JS -->
     </tbody>
   </table>
+
+  <div class="pagination">
+    <span class="page-btn" id="prev">Prev</span>
+    <span class="page-btn" id="next">Next</span>
+  </div>
 </div>
 
 <footer>© 2025 Dynotic ID</footer>
 
 <script>
-// Lagu tunggal
+// Data lagu
 const songs = [
   {title:"Ada Gajah Di Balik Batu", status:"approve"}
 ];
 
+let filteredSongs = [...songs];
+let currentPage = 1;
+const rowsPerPage = 5;
+
 function renderTable(){
   const tableBody = document.getElementById("table-body");
   tableBody.innerHTML = "";
-  songs.forEach(song=>{
+  const start = (currentPage-1)*rowsPerPage;
+  const end = start + rowsPerPage;
+  const pageSongs = filteredSongs.slice(start, end);
+
+  pageSongs.forEach(song=>{
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${song.title}</td>
-      <td><span class="status-text status-${song.status}">${song.status.charAt(0).toUpperCase() + song.status.slice(1)}<span class="dot">•</span></span></td>
-      <td>Not Available</td>
+      <td><span class="status-text status-${song.status}">
+        ${song.status.charAt(0).toUpperCase() + song.status.slice(1)}
+        <span class="dot">•</span>
+      </span></td>
+      <td>${song.status === "approve" ? '<span class="smartlink-text">Link</span>' : 'Not Available'}</td>
     `;
     tableBody.appendChild(row);
   });
 }
+
+document.getElementById("prev").addEventListener("click", ()=>{
+  if(currentPage>1){
+    currentPage--;
+    renderTable();
+  }
+});
+
+document.getElementById("next").addEventListener("click", ()=>{
+  if(currentPage*rowsPerPage < filteredSongs.length){
+    currentPage++;
+    renderTable();
+  }
+});
+
+document.getElementById("search").addEventListener("input", (e)=>{
+  const keyword = e.target.value.toLowerCase();
+  filteredSongs = songs.filter(song => song.title.toLowerCase().includes(keyword));
+  currentPage = 1;
+  renderTable();
+});
 
 renderTable();
 </script>
